@@ -1,0 +1,2 @@
+export { useCanvasStore } from "./canvasStore";
+
