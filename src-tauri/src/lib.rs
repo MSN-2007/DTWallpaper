@@ -63,6 +63,24 @@ fn get_platform_capabilities() -> platform::PlatformCapabilities {
     platform::detect_capabilities()
 }
 
+/// Tauri command: retrieve current desktop wallpaper
+#[tauri::command]
+fn get_desktop_wallpaper() -> Result<platform::WallpaperInfo, String> {
+    platform::get_desktop_wallpaper()
+}
+
+/// Tauri command: retrieve user desktop icons and shortcuts
+#[tauri::command]
+fn get_desktop_icons() -> Result<Vec<platform::DesktopIcon>, String> {
+    platform::get_desktop_icons()
+}
+
+/// Tauri command: open a desktop icon or shortcut
+#[tauri::command]
+fn open_desktop_item(path: String) -> Result<(), String> {
+    platform::open_desktop_item(&path)
+}
+
 pub fn run() {
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();
 
@@ -72,7 +90,10 @@ pub fn run() {
                 .with_handler(move |app, shortcut, event| {
                     if event.state() == tauri_plugin_global_shortcut::ShortcutState::Pressed {
                         let ctrl_space = "ctrl+space".parse::<tauri_plugin_global_shortcut::Shortcut>().unwrap();
-                        if shortcut == &ctrl_space {
+                        let alt_space = "alt+space".parse::<tauri_plugin_global_shortcut::Shortcut>().unwrap();
+                        let f8 = "f8".parse::<tauri_plugin_global_shortcut::Shortcut>().unwrap();
+
+                        if shortcut == &ctrl_space || shortcut == &alt_space || shortcut == &f8 {
                             toggle_window_visibility(app);
                         }
                     }
@@ -80,11 +101,30 @@ pub fn run() {
                 .build(),
         )
         .setup(|app| {
-            // Register global shortcut on startup
             use tauri_plugin_global_shortcut::GlobalShortcutExt;
-            let shortcut = "ctrl+space".parse::<tauri_plugin_global_shortcut::Shortcut>()?;
-            app.global_shortcut().register(shortcut)?;
-            log::info!("Global shortcut Ctrl+Space registered");
+
+            // Register primary trigger Ctrl+Space
+            if let Ok(shortcut) = "ctrl+space".parse::<tauri_plugin_global_shortcut::Shortcut>() {
+                if let Err(e) = app.global_shortcut().register(shortcut) {
+                    log::warn!("Failed to register Ctrl+Space: {}", e);
+                } else {
+                    log::info!("Global shortcut Ctrl+Space registered");
+                }
+            }
+
+            // Register fallback triggers (Alt+Space and F8) in case Ctrl+Space is consumed by another tool
+            if let Ok(shortcut) = "alt+space".parse::<tauri_plugin_global_shortcut::Shortcut>() {
+                let _ = app.global_shortcut().register(shortcut);
+            }
+            if let Ok(shortcut) = "f8".parse::<tauri_plugin_global_shortcut::Shortcut>() {
+                let _ = app.global_shortcut().register(shortcut);
+            }
+
+            // Auto-maximize window to cover full screen like a native wallpaper layer
+            if let Some(window) = app.get_webview_window("main") {
+                let _ = window.maximize();
+            }
+
             log::info!("Desktop Canvas v0.1.0 started");
             Ok(())
         })
@@ -94,6 +134,9 @@ pub fn run() {
             hide_canvas,
             show_canvas,
             get_platform_capabilities,
+            get_desktop_wallpaper,
+            get_desktop_icons,
+            open_desktop_item,
         ])
         .run(tauri::generate_context!())
         .expect("error while running Desktop Canvas");

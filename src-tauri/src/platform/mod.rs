@@ -29,6 +29,22 @@ pub struct PlatformCapabilities {
     pub desktop_environment: String,
 }
 
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct DesktopIcon {
+    pub name: String,
+    pub path: String,
+    pub is_dir: bool,
+    pub extension: String,
+    pub icon_base64: Option<String>,
+}
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct WallpaperInfo {
+    pub mime_type: String,
+    pub data_base64: String,
+    pub file_path: Option<String>,
+}
+
 /// Detect capabilities for the current platform.
 pub fn detect_capabilities() -> PlatformCapabilities {
     #[cfg(target_os = "linux")]
@@ -48,6 +64,48 @@ pub fn detect_capabilities() -> PlatformCapabilities {
         display_protocol: "unknown".to_string(),
         desktop_environment: "unknown".to_string(),
     };
+}
+
+pub fn get_desktop_wallpaper() -> Result<WallpaperInfo, String> {
+    #[cfg(target_os = "windows")]
+    return windows::get_wallpaper();
+
+    #[cfg(target_os = "linux")]
+    return linux::get_wallpaper();
+
+    #[cfg(target_os = "macos")]
+    return macos::get_wallpaper();
+
+    #[cfg(not(any(target_os = "linux", target_os = "windows", target_os = "macos")))]
+    Err("Unsupported platform for wallpaper retrieval".to_string())
+}
+
+pub fn get_desktop_icons() -> Result<Vec<DesktopIcon>, String> {
+    #[cfg(target_os = "windows")]
+    return windows::get_desktop_icons();
+
+    #[cfg(target_os = "linux")]
+    return linux::get_desktop_icons();
+
+    #[cfg(target_os = "macos")]
+    return macos::get_desktop_icons();
+
+    #[cfg(not(any(target_os = "linux", target_os = "windows", target_os = "macos")))]
+    Ok(Vec::new())
+}
+
+pub fn open_desktop_item(path: &str) -> Result<(), String> {
+    #[cfg(target_os = "windows")]
+    return windows::open_item(path);
+
+    #[cfg(target_os = "linux")]
+    return linux::open_item(path);
+
+    #[cfg(target_os = "macos")]
+    return macos::open_item(path);
+
+    #[cfg(not(any(target_os = "linux", target_os = "windows", target_os = "macos")))]
+    Err("Unsupported platform to open item".to_string())
 }
 
 #[cfg(test)]

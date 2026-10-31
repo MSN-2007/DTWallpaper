@@ -1,14 +1,23 @@
 import { create } from "zustand";
-import type { CanvasState, CanvasActions, CanvasViewport, CanvasMode, CanvasWidget } from "@/types";
+import type {
+  CanvasState,
+  CanvasActions,
+  CanvasViewport,
+  CanvasMode,
+  CanvasWidget,
+  DesktopIconItem,
+  WallpaperData,
+} from "@/types";
 
 const STORAGE_KEY = "dtwallpaper_canvas_state_v1";
+const SETTINGS_KEY = "dtwallpaper_settings_v1";
 
 const DEFAULT_WIDGETS: CanvasWidget[] = [
   {
     id: "default-clock",
     type: "clock",
-    x: 80,
-    y: 100,
+    x: 180,
+    y: 80,
     width: 260,
     height: 140,
     zIndex: 1,
@@ -17,8 +26,8 @@ const DEFAULT_WIDGETS: CanvasWidget[] = [
   {
     id: "default-todo",
     type: "todo-list",
-    x: 370,
-    y: 100,
+    x: 470,
+    y: 80,
     width: 320,
     height: 330,
     zIndex: 2,
@@ -27,8 +36,8 @@ const DEFAULT_WIDGETS: CanvasWidget[] = [
   {
     id: "default-pomodoro",
     type: "pomodoro",
-    x: 720,
-    y: 100,
+    x: 820,
+    y: 80,
     width: 300,
     height: 210,
     zIndex: 3,
@@ -37,8 +46,8 @@ const DEFAULT_WIDGETS: CanvasWidget[] = [
   {
     id: "default-timer",
     type: "timer",
-    x: 80,
-    y: 265,
+    x: 180,
+    y: 245,
     width: 260,
     height: 165,
     zIndex: 4,
@@ -61,9 +70,36 @@ const loadSavedWidgets = (): CanvasWidget[] => {
   return DEFAULT_WIDGETS;
 };
 
+const loadSavedSettings = () => {
+  try {
+    const saved = localStorage.getItem(SETTINGS_KEY);
+    if (saved) {
+      return JSON.parse(saved);
+    }
+  } catch {
+    // fallback
+  }
+  return {
+    showDesktopIcons: true,
+    useLiveWallpaper: true,
+    wallpaperOpacity: 0.95,
+  };
+};
+
+const savedSettings = loadSavedSettings();
+
 const saveWidgets = (widgets: CanvasWidget[]) => {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(widgets));
+  } catch {
+    // Ignore storage errors
+  }
+};
+
+const saveSettings = (settings: Record<string, unknown>) => {
+  try {
+    const current = loadSavedSettings();
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify({ ...current, ...settings }));
   } catch {
     // Ignore storage errors
   }
@@ -79,6 +115,12 @@ export const useCanvasStore = create<CanvasState & CanvasActions>()((set) => ({
   mode: "view" as CanvasMode,
   selectedWidgetId: null,
   isVisible: true,
+
+  showDesktopIcons: savedSettings.showDesktopIcons ?? true,
+  useLiveWallpaper: savedSettings.useLiveWallpaper ?? true,
+  wallpaperOpacity: savedSettings.wallpaperOpacity ?? 0.95,
+  wallpaperData: null,
+  desktopIcons: [],
 
   show: () => set({ isVisible: true }),
   hide: () => set({ isVisible: false }),
@@ -119,4 +161,26 @@ export const useCanvasStore = create<CanvasState & CanvasActions>()((set) => ({
           state.selectedWidgetId === id ? null : state.selectedWidgetId,
       };
     }),
+
+  setShowDesktopIcons: (show: boolean) =>
+    set(() => {
+      saveSettings({ showDesktopIcons: show });
+      return { showDesktopIcons: show };
+    }),
+
+  setUseLiveWallpaper: (use: boolean) =>
+    set(() => {
+      saveSettings({ useLiveWallpaper: use });
+      return { useLiveWallpaper: use };
+    }),
+
+  setWallpaperOpacity: (opacity: number) =>
+    set(() => {
+      saveSettings({ wallpaperOpacity: opacity });
+      return { wallpaperOpacity: opacity };
+    }),
+
+  setWallpaperData: (data: WallpaperData | null) => set({ wallpaperData: data }),
+
+  setDesktopIcons: (icons: DesktopIconItem[]) => set({ desktopIcons: icons }),
 }));

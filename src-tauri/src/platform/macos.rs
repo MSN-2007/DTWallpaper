@@ -1,8 +1,7 @@
-//! macOS-specific platform code (placeholder for future support).
+//! macOS-specific platform code (stub for future release)
 
-use super::PlatformCapabilities;
+use super::{DesktopIcon, PlatformCapabilities, WallpaperInfo};
 
-/// Detect macOS platform capabilities.
 pub fn detect_capabilities() -> PlatformCapabilities {
     PlatformCapabilities {
         global_shortcuts: true,
@@ -11,4 +10,16 @@ pub fn detect_capabilities() -> PlatformCapabilities {
         display_protocol: "cocoa".to_string(),
         desktop_environment: "macos".to_string(),
     }
+}
+
+pub fn get_wallpaper() -> Result<WallpaperInfo, String> {
+    Err("Wallpaper detection not implemented on macOS yet".to_string())
+}
+
+pub fn get_desktop_icons() -> Result<Vec<DesktopIcon>, String> {
+    Ok(Vec::new())
+}
+
+pub fn open_item(_path: &str) -> Result<(), String> {
+    Ok(())
 }

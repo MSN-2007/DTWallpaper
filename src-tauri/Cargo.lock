@@ -620,6 +620,7 @@ dependencies = [
 name = "desktop-canvas"
 version = "0.1.0"
 dependencies = [
+ "base64 0.23.1",
  "env_logger",
  "log",
  "serde",
