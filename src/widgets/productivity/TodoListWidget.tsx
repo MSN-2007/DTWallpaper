@@ -122,3 +122,4 @@ export const TodoListWidget: React.FC<TodoListWidgetProps> = ({ settings, onUpda
     </div>
   );
 };
+

@@ -104,3 +104,4 @@ export const TimerWidget: React.FC<TimerWidgetProps> = () => {
     </div>
   );
 };
+
