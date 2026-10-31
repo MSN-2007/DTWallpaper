@@ -7,6 +7,7 @@ import type {
   CanvasWidget,
   DesktopIconItem,
   WallpaperData,
+  NavTabId,
 } from "@/types";
 
 const STORAGE_KEY = "dtwallpaper_canvas_state_v1";
@@ -80,9 +81,10 @@ const loadSavedSettings = () => {
     // fallback
   }
   return {
-    showDesktopIcons: true,
-    useLiveWallpaper: true,
+    showDesktopIcons: false,
+    useLiveWallpaper: false,
     wallpaperOpacity: 0.95,
+    activeThemeId: "obsidian",
   };
 };
 
@@ -112,12 +114,17 @@ export const useCanvasStore = create<CanvasState & CanvasActions>()((set) => ({
     zoom: 1,
   },
   widgets: loadSavedWidgets(),
-  mode: "view" as CanvasMode,
+  mode: "edit" as CanvasMode,
   selectedWidgetId: null,
   isVisible: true,
 
-  showDesktopIcons: savedSettings.showDesktopIcons ?? true,
-  useLiveWallpaper: savedSettings.useLiveWallpaper ?? true,
+  // Navigation & Resource Sidebar
+  activeNavTab: "templates",
+  isSidebarOpen: true,
+  activeThemeId: savedSettings.activeThemeId || "obsidian",
+
+  showDesktopIcons: savedSettings.showDesktopIcons ?? false,
+  useLiveWallpaper: savedSettings.useLiveWallpaper ?? false,
   wallpaperOpacity: savedSettings.wallpaperOpacity ?? 0.95,
   wallpaperData: null,
   desktopIcons: [],
@@ -161,6 +168,30 @@ export const useCanvasStore = create<CanvasState & CanvasActions>()((set) => ({
           state.selectedWidgetId === id ? null : state.selectedWidgetId,
       };
     }),
+
+  setWidgets: (widgets: CanvasWidget[]) => {
+    saveWidgets(widgets);
+    set({ widgets, selectedWidgetId: null });
+  },
+
+  setActiveNavTab: (tab: NavTabId | null) =>
+    set((state) => {
+      if (tab === null) {
+        return { activeNavTab: null, isSidebarOpen: false };
+      }
+      if (state.activeNavTab === tab && state.isSidebarOpen) {
+        return { isSidebarOpen: false };
+      }
+      return { activeNavTab: tab, isSidebarOpen: true };
+    }),
+
+  toggleSidebar: () => set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
+  setIsSidebarOpen: (open: boolean) => set({ isSidebarOpen: open }),
+
+  setActiveThemeId: (themeId: string) => {
+    saveSettings({ activeThemeId: themeId });
+    set({ activeThemeId: themeId });
+  },
 
   setShowDesktopIcons: (show: boolean) =>
     set(() => {

@@ -6,4 +6,5 @@ export type {
   CanvasActions,
   DesktopIconItem,
   WallpaperData,
+  NavTabId,
 } from "./canvas";

@@ -45,3 +45,4 @@ export const DesktopIconsLayer: React.FC<DesktopIconsLayerProps> = ({ icons, onO
     </div>
   );
 };
+

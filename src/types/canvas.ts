@@ -35,16 +35,30 @@ export interface WallpaperData {
 
 export type CanvasMode = "view" | "edit";
 
+export type NavTabId =
+  | "templates"
+  | "widgets"
+  | "tasks"
+  | "schedule"
+  | "analytics"
+  | "system"
+  | "themes"
+  | "connections";
+
 export interface CanvasState {
   viewport: CanvasViewport;
   widgets: CanvasWidget[];
   mode: CanvasMode;
   selectedWidgetId: string | null;
   isVisible: boolean;
+  // Navigation & Resource Sidebar
+  activeNavTab: NavTabId | null;
+  isSidebarOpen: boolean;
+  activeThemeId: string;
   // Wallpaper & Icon options
   showDesktopIcons: boolean;
   useLiveWallpaper: boolean;
-  wallpaperOpacity: number; // 0.1 to 1.0
+  wallpaperOpacity: number;
   wallpaperData: WallpaperData | null;
   desktopIcons: DesktopIconItem[];
 }
@@ -59,6 +73,12 @@ export interface CanvasActions {
   addWidget: (widget: CanvasWidget) => void;
   updateWidget: (id: string, updates: Partial<CanvasWidget>) => void;
   removeWidget: (id: string) => void;
+  setWidgets: (widgets: CanvasWidget[]) => void;
+  // Navigation & Sidebar
+  setActiveNavTab: (tab: NavTabId | null) => void;
+  toggleSidebar: () => void;
+  setIsSidebarOpen: (open: boolean) => void;
+  setActiveThemeId: (themeId: string) => void;
   // Options
   setShowDesktopIcons: (show: boolean) => void;
   setUseLiveWallpaper: (use: boolean) => void;
