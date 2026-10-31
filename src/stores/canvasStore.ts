@@ -1,69 +1,122 @@
 import { create } from "zustand";
 import type { CanvasState, CanvasActions, CanvasViewport, CanvasMode, CanvasWidget } from "@/types";
 
-/**
- * Primary Zustand store for the canvas application.
- *
- * This store manages:
- * - Viewport state (position, zoom)
- * - Widget collection
- * - Canvas mode (view / edit)
- * - Selection state
- * - Visibility (show/hide overlay)
- *
- * Performance notes:
- * - Selectors should be used to avoid unnecessary re-renders.
- * - Widget updates are immutable but targeted (only the changed widget).
- * - Viewport changes use partial updates to minimize object creation.
- */
+const STORAGE_KEY = "dtwallpaper_canvas_state_v1";
+
+const DEFAULT_WIDGETS: CanvasWidget[] = [
+  {
+    id: "default-clock",
+    type: "clock",
+    x: 80,
+    y: 100,
+    width: 260,
+    height: 140,
+    zIndex: 1,
+    settings: {},
+  },
+  {
+    id: "default-todo",
+    type: "todo-list",
+    x: 370,
+    y: 100,
+    width: 320,
+    height: 330,
+    zIndex: 2,
+    settings: {},
+  },
+  {
+    id: "default-pomodoro",
+    type: "pomodoro",
+    x: 720,
+    y: 100,
+    width: 300,
+    height: 210,
+    zIndex: 3,
+    settings: {},
+  },
+  {
+    id: "default-timer",
+    type: "timer",
+    x: 80,
+    y: 265,
+    width: 260,
+    height: 165,
+    zIndex: 4,
+    settings: {},
+  },
+];
+
+const loadSavedWidgets = (): CanvasWidget[] => {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    }
+  } catch {
+    // fallback
+  }
+  return DEFAULT_WIDGETS;
+};
+
+const saveWidgets = (widgets: CanvasWidget[]) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(widgets));
+  } catch {
+    // Ignore storage errors
+  }
+};
+
 export const useCanvasStore = create<CanvasState & CanvasActions>()((set) => ({
-  // ── Initial State ────────────────────────────────────────────
   viewport: {
     x: 0,
     y: 0,
     zoom: 1,
   },
-  widgets: [],
+  widgets: loadSavedWidgets(),
   mode: "view" as CanvasMode,
   selectedWidgetId: null,
-  isVisible: true, // Start visible for Sprint 0 development
+  isVisible: true,
 
-  // ── Visibility ───────────────────────────────────────────────
   show: () => set({ isVisible: true }),
   hide: () => set({ isVisible: false }),
   toggle: () => set((state) => ({ isVisible: !state.isVisible })),
 
-  // ── Viewport ─────────────────────────────────────────────────
   setViewport: (partial: Partial<CanvasViewport>) =>
     set((state) => ({
       viewport: { ...state.viewport, ...partial },
     })),
 
-  // ── Mode ─────────────────────────────────────────────────────
   setMode: (mode: CanvasMode) => set({ mode }),
 
-  // ── Selection ────────────────────────────────────────────────
   selectWidget: (id: string | null) => set({ selectedWidgetId: id }),
 
-  // ── Widget CRUD ──────────────────────────────────────────────
   addWidget: (widget: CanvasWidget) =>
-    set((state) => ({
-      widgets: [...state.widgets, widget],
-    })),
+    set((state) => {
+      const updated = [...state.widgets, widget];
+      saveWidgets(updated);
+      return { widgets: updated, selectedWidgetId: widget.id };
+    }),
 
   updateWidget: (id: string, updates: Partial<CanvasWidget>) =>
-    set((state) => ({
-      widgets: state.widgets.map((w) =>
+    set((state) => {
+      const updated = state.widgets.map((w) =>
         w.id === id ? { ...w, ...updates } : w
-      ),
-    })),
+      );
+      saveWidgets(updated);
+      return { widgets: updated };
+    }),
 
   removeWidget: (id: string) =>
-    set((state) => ({
-      widgets: state.widgets.filter((w) => w.id !== id),
-      // Clear selection if the removed widget was selected
-      selectedWidgetId:
-        state.selectedWidgetId === id ? null : state.selectedWidgetId,
-    })),
+    set((state) => {
+      const updated = state.widgets.filter((w) => w.id !== id);
+      saveWidgets(updated);
+      return {
+        widgets: updated,
+        selectedWidgetId:
+          state.selectedWidgetId === id ? null : state.selectedWidgetId,
+      };
+    }),
 }));
-
