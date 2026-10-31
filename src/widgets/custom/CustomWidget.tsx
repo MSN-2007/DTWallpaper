@@ -71,3 +71,4 @@ export const CustomWidget: React.FC<CustomWidgetProps> = ({ settings, onUpdateSe
     </div>
   );
 };
+

@@ -15,7 +15,6 @@
       {
         "label": "main",
         "title": "Desktop Canvas",
-        "label": "main",
         "width": 1280,
         "height": 800,
         "minWidth": 800,
@@ -29,11 +28,6 @@
     ],
     "security": {
       "csp": "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; font-src 'self' https://fonts.gstatic.com; connect-src 'self' ipc: http://ipc.localhost"
-    }
-  },
-  "plugins": {
-    "global-shortcut": {
-      "shortcuts": []
     }
   }
 }
