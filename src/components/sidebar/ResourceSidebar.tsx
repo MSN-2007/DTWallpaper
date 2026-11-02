@@ -170,3 +170,4 @@ export const ResourceSidebar: React.FC = () => {
     </aside>
   );
 };
+

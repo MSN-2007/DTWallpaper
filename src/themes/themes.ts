@@ -85,3 +85,4 @@ export const THEMES: Record<string, ThemeDefinition> = {
     previewGradient: "from-zinc-100 via-stone-100 to-zinc-200",
   },
 };
+

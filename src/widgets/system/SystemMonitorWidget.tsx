@@ -92,3 +92,4 @@ export const SystemMonitorWidget: React.FC = () => {
     </div>
   );
 };
+

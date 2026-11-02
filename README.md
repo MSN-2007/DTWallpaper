@@ -2,17 +2,55 @@
 
 > **Open-Source, Local-First Freeform Desktop Productivity Canvas**
 
-Transform your desktop into your personal productivity workspace. Rather than forcing you into rigid dashboards or separate web applications, Desktop Canvas runs natively on your desktop with an infinite, hardware-accelerated spatial canvas. Place modular widgets anywhere, pan & zoom, resize, and tailor your setup with total freedom.
+Transform your desktop into a **temporary interactive productivity planner** that appears right on your OS desktop — alongside your real wallpaper and desktop icons — whenever you need it, and disappears cleanly when you're done.
 
 ---
 
 ## 🌟 Core Highlights
 
-- **Desktop Overlay**: Summon or hide your personal canvas instantly using `Ctrl+Space`.
-- **Zero Cloud / Local-First**: 100% of your data, widgets, and layouts are stored locally on your machine.
-- **Ultra-Lightweight**: Built on **Tauri 2 + Rust + React/TypeScript**. Uses ~20 MB RAM at idle with a ~4 MB compiled release binary.
-- **Freeform Spatial Canvas**: Viewport panning, cursor-anchored zooming, and customizable widget positioning.
-- **Modular Widgets**: Includes built-in Clock, Countdown Timer, Pomodoro Focus, To-do List, and Custom Extensible blocks.
+- **Temporary Desktop Planner Mode**: A custom trigger minimises all your windows to reveal the real OS desktop, then overlays your interactive productivity canvas on top — fully transparent, layered cleanly over your actual wallpaper.
+- **Global Triggers**: Mouse-shake gesture (rapid left-right shake), `Ctrl+Space`, `Alt+Space`, or `F8` to summon/dismiss the canvas from anywhere.
+- **Auto-Dismiss Timer**: Session auto-dismisses after a configurable duration (30s / 45s / 60s or pinned) — restoring all your previous windows exactly as they were.
+- **Zero Cloud / Local-First**: 100% of your data, widgets, and layouts are stored locally.
+- **Ultra-Lightweight**: Built on **Tauri 2 + Rust + React/TypeScript**. ~20 MB RAM idle, ~4 MB binary.
+- **Freeform Spatial Canvas**: Infinite whiteboard with pan, zoom, drag, resize, multi-select, and snap.
+- **Modular Widgets**: Clock, Countdown Timer, Pomodoro Focus, To-do List, and extensible Custom blocks.
+- **Canva-Inspired 3-Panel Architecture**: Left navigation rail, contextual resource sidebar, main canvas workspace.
+
+---
+
+## 🎯 Temporary Desktop Planner – How It Works
+
+### Normal Working Mode
+You work normally with VS Code, Chrome, Terminal, and other apps open.
+
+### Trigger Activation (any of these)
+| Trigger | Method |
+|---|---|
+| **Mouse Shake** | Rapidly shake mouse left-right (4+ reversals within 400ms) |
+| **Keyboard** | `Ctrl+Space` / `Alt+Space` / `F8` |
+| **Tray Icon** | Click the Desktop Canvas system tray icon |
+
+### What Happens
+```
+1. Capture current foreground window (saved for restore)
+2. Invoke Windows "Show Desktop" (Win+D) to minimise all windows
+3. Display the productivity canvas over your real desktop wallpaper
+4. Session timer starts (default 45 seconds, configurable)
+```
+
+### Planner Session
+You see your real desktop transformed into a productivity workspace — actual wallpaper, actual desktop icons, with your interactive canvas overlaid on top. All widgets are live: to-dos, Pomodoro, clock, notes.
+
+### Session End
+When the timer expires **or** you press `Esc` (or click Dismiss):
+```
+1. Save any pending widget changes
+2. Hide the canvas overlay
+3. Restore windows (Win+D again to un-minimise)
+4. Restore focus to the previous foreground window
+```
+No apps are closed. No browser tabs lost. No work disrupted.
 
 ---
 
@@ -20,34 +58,49 @@ Transform your desktop into your personal productivity workspace. Rather than fo
 
 | Shortcut / Control | Action |
 |--------------------|--------|
-| <kbd>Ctrl</kbd> + <kbd>Space</kbd> | Global shortcut to summon / hide the desktop canvas overlay |
-| <kbd>E</kbd> | Toggle between **Viewing Mode** and **Editing Mode** |
-| <kbd>Esc</kbd> | Dismiss canvas overlay |
-| **Middle Click Drag** or **Canvas Drag** | Pan around the infinite canvas |
-| **Mouse Wheel** | Zoom in / out centered on cursor position |
-| **Widget Header Drag** | Reposition widget (*in Edit Mode*) |
-| **Widget Bottom-Right Corner** | Resize widget dimensions (*in Edit Mode*) |
-| **Add Widget Button** | Open the widget catalog (*in Edit Mode*) |
+| `Ctrl+Space` | Summon / dismiss the desktop canvas (global) |
+| `Alt+Space` | Fallback summon / dismiss shortcut |
+| `F8` | Fallback summon / dismiss shortcut |
+| Mouse Shake (rapid L-R) | Summon / activate the planner session |
+| `Esc` | Dismiss canvas & restore previous desktop |
+| `E` | Toggle **View Mode** ↔ **Edit Mode** |
+| **Middle Click Drag** or **Canvas Drag** | Pan the infinite canvas |
+| **Mouse Wheel** | Zoom in / out (cursor-anchored) |
+| **Widget Header Drag** | Reposition widget *(Edit Mode)* |
+| **Widget Bottom-Right Corner** | Resize widget *(Edit Mode)* |
+
+---
+
+## 🔔 Session HUD
+
+A floating HUD appears in the top-right of the canvas while your session is active:
+
+- **Circular countdown ring**: Animated ring showing time remaining
+- **30s / 45s / 60s quick buttons**: Change session duration mid-session
+- **📌 Pin button**: Lock the planner open indefinitely (pauses timer)
+- **✕ Dismiss button**: Manually end session and restore windows
 
 ---
 
 ## 🧩 Built-in Widgets
 
-1. **Clock & Date (`clock`)**: Elegant local time display with tabular monospace numbers, weekday, and date.
-2. **Countdown Timer (`timer`)**: Precise timer with 1m, 5m, 10m, and 15m presets, live progress bar, pause/resume, and reset.
-3. **Pomodoro Focus (`pomodoro`)**: Focus (25m), Short Break (5m), and Long Break (15m) cycles with completed session tracking.
-4. **To-do List (`todo-list`)**: Interactive task manager supporting inline task creation, check-off toggles, and deletion.
-5. **Custom Note / Block (`custom`)**: User-editable block for custom notes, links, and markdown snippets.
+| Widget | Type Key | Description |
+|---|---|---|
+| **Clock & Date** | `clock` | Elegant local time display with weekday, date, monospace tabular font |
+| **Countdown Timer** | `timer` | 1m/5m/10m/15m presets, live progress bar, pause/resume/reset |
+| **Pomodoro Focus** | `pomodoro` | 25m focus, 5m short break, 15m long break, session count |
+| **To-do List** | `todo-list` | Inline task creation, check-off, delete, persistent across sessions |
+| **Custom Note Block** | `custom` | Free-form editable note, link, or markdown-style block |
 
 ---
 
 ## 🛠️ How to Build, Add & Upload Custom Widgets
 
-The Desktop Canvas widget architecture is built to be completely modular and extensible. Any React component can become a canvas widget.
+The widget architecture is fully modular — any React component can become a canvas widget.
 
 ### Step 1: Create Your Widget Component
 
-Create a new file in `src/widgets/` (for example, `src/widgets/custom/MyWidget.tsx`):
+Create a new file in `src/widgets/` (e.g. `src/widgets/custom/MyWidget.tsx`):
 
 ```tsx
 import React from "react";
@@ -58,7 +111,7 @@ interface MyWidgetProps {
   onUpdateSettings?: (settings: Record<string, unknown>) => void;
 }
 
-export const MyWidget: React.FC<MyWidgetProps> = ({ settings, onUpdateSettings }) => {
+export const MyWidget: React.FC<MyWidgetProps> = () => {
   return (
     <div className="flex flex-col justify-between h-full p-3.5 select-none text-white">
       <div className="flex items-center gap-1.5 text-xs font-medium text-cyan-400">
@@ -73,19 +126,19 @@ export const MyWidget: React.FC<MyWidgetProps> = ({ settings, onUpdateSettings }
 };
 ```
 
-### Step 2: Register the Widget in the Registry
+### Step 2: Register the Widget
 
-Open [`src/widgets/registry.ts`](file:///c:/work/DTWallpaper/src/widgets/registry.ts) and add your widget definition to `WIDGET_REGISTRY`:
+Open [`src/widgets/registry.ts`](src/widgets/registry.ts) and add your widget to `WIDGET_REGISTRY`:
 
-```tsx
+```ts
 import { MyWidget } from "./custom/MyWidget";
 
 export const WIDGET_REGISTRY: Record<string, WidgetDefinition> = {
-  // ... other widgets
+  // ... existing widgets ...
   "my-widget": {
     type: "my-widget",
     name: "My Widget",
-    category: "custom", // "productivity" | "information" | "scheduling" | "system-monitor" | "custom"
+    category: "custom",   // "productivity" | "information" | "scheduling" | "custom"
     defaultWidth: 280,
     defaultHeight: 180,
     description: "My custom desktop canvas widget",
@@ -94,38 +147,36 @@ export const WIDGET_REGISTRY: Record<string, WidgetDefinition> = {
 };
 ```
 
-### Step 3: Use Your Widget on the Canvas
+### Step 3: Use Your Widget
 
-1. Run the app (`npm run dev` or launch the Tauri executable).
-2. Press <kbd>E</kbd> to enter **Editing Mode**.
-3. Click the **+ Add Widget** button in the top navigation bar.
-4. Select your widget from the modal to place it on the canvas.
-5. Drag, resize, and position it wherever you prefer.
+1. Run the app (`cargo tauri dev`).
+2. Press `E` to enter **Edit Mode**.
+3. Open the **Widgets** panel in the left navigation rail.
+4. Find your widget and click **Add to Canvas**.
+5. Drag, resize, and arrange it anywhere.
 
-### Step 4: Share / Upload Your Widget
+### Step 4: Share / Submit Your Widget
 
-1. **Commit your widget files**:
-   ```bash
-   git add src/widgets/custom/MyWidget.tsx src/widgets/registry.ts
-   git commit -m "feat(widget): add MyWidget"
-   git push origin main
-   ```
-2. **Submit a Pull Request**:
-   - Push to your fork or branch on GitHub: [https://github.com/MSN-2007/DTWallpaper](https://github.com/MSN-2007/DTWallpaper)
-   - Open a PR describing your widget and its category.
+```bash
+git add src/widgets/custom/MyWidget.tsx src/widgets/registry.ts
+git commit -m "feat(widget): add MyWidget"
+git push origin main
+# Then open a PR at https://github.com/MSN-2007/DTWallpaper
+```
 
 ---
 
 ## 💻 Tech Stack
 
 | Layer | Technology |
-|-------|-----------|
+|---|---|
 | **Desktop Framework** | Tauri 2 (Rust) |
 | **Frontend UI** | React 18 + TypeScript |
 | **Bundler** | Vite |
-| **Styling** | Tailwind CSS (Obsidian Theme) |
-| **State Management** | Zustand (Local Persistence) |
+| **Styling** | Tailwind CSS v4 |
+| **State Management** | Zustand (local-persistent) |
 | **Icons** | Lucide React |
+| **Windows Native APIs** | `windows-rs` crate (`Win32::UI::Input::KeyboardAndMouse`, `Win32::UI::WindowsAndMessaging`) |
 
 ---
 
@@ -133,9 +184,9 @@ export const WIDGET_REGISTRY: Record<string, WidgetDefinition> = {
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) (v20+ recommended)
-- [Rust & Cargo](https://rustup.rs/) (v1.75+)
-- Tauri CLI v2 (`npm run tauri` or `@tauri-apps/cli`)
+- [Node.js](https://nodejs.org/) v20+
+- [Rust & Cargo](https://rustup.rs/) v1.75+
+- Tauri CLI v2 (`cargo install tauri-cli`)
 
 ### Quickstart
 
@@ -144,21 +195,22 @@ export const WIDGET_REGISTRY: Record<string, WidgetDefinition> = {
 git clone https://github.com/MSN-2007/DTWallpaper.git
 cd DTWallpaper
 
-# Install dependencies
+# Install frontend dependencies
 npm install
 
-# Run frontend in browser dev mode
+# Run frontend only (browser dev mode)
 npm run dev
 
-# Run native desktop app in dev mode
-npx tauri dev
+# Run full native desktop app (Rust + React)
+cargo tauri dev
 
 # Build production binary
-npx tauri build --no-bundle
+cargo tauri build --no-bundle
 ```
 
-The compiled native executable will be located in:
-`src-tauri/target/release/desktop-canvas.exe` (or `desktop-canvas` on Linux).
+The compiled binary is at `src-tauri/target/release/desktop-canvas.exe`.
+
+> **Note on `npm tauri dev`**: This is incorrect. Use `cargo tauri dev` (Tauri CLI is a Cargo binary, not an npm script — unless you add `"tauri": "tauri"` to `package.json` scripts, which is optional).
 
 ---
 
@@ -166,30 +218,58 @@ The compiled native executable will be located in:
 
 ```
 DTWallpaper/
-├── src-tauri/                 # Rust backend (Tauri 2)
+├── src-tauri/                  # Rust backend (Tauri 2)
 │   ├── src/
-│   │   ├── main.rs            # Application entrypoint
-│   │   ├── lib.rs             # IPC handlers, global shortcuts, events
-│   │   └── platform/          # OS-specific capability detection (Linux/Win/macOS)
-│   ├── Cargo.toml             # Rust configuration & optimizations
-│   └── tauri.conf.json        # Window & capability permissions
-├── src/                       # React frontend
+│   │   ├── main.rs             # App entrypoint
+│   │   ├── lib.rs              # IPC commands, global shortcuts, session setup
+│   │   ├── session/
+│   │   │   ├── mod.rs          # Session module exports
+│   │   │   ├── controller.rs   # Desktop Session state machine (IDLE → PLANNER_ACTIVE → IDLE)
+│   │   │   └── mouse_hook.rs   # Low-level WH_MOUSE_LL mouse shake detector (Windows)
+│   │   └── platform/           # OS-specific wallpaper & desktop icon queries
+│   ├── Cargo.toml
+│   └── tauri.conf.json
+├── src/                        # React frontend
 │   ├── canvas/
-│   │   ├── Canvas.tsx         # Freeform canvas HUD & viewport transform
-│   │   ├── WidgetContainer.tsx# Drag, resize, and selection handles
-│   │   └── AddWidgetModal.tsx # Widget catalog modal
+│   │   ├── Canvas.tsx          # Main canvas: pan/zoom, header HUD, keyboard shortcuts
+│   │   ├── WidgetContainer.tsx # Drag, resize, selection chrome
+│   │   └── DesktopIconsLayer.tsx # Optional desktop icon overlay
+│   ├── components/
+│   │   ├── navigation/NavigationRail.tsx   # 68px left nav rail (8 tabs)
+│   │   ├── sidebar/ResourceSidebar.tsx     # Contextual resource panels
+│   │   └── session/SessionHUD.tsx          # Session timer HUD with pin/dismiss
 │   ├── widgets/
-│   │   ├── information/       # Clock & Date widget
-│   │   ├── productivity/      # Timer, Pomodoro, and Todo widgets
-│   │   ├── custom/            # Custom note/block widget
-│   │   └── registry.ts        # Central widget registry & types
-│   ├── stores/                # Zustand stores with persistent storage
-│   ├── styles/                # Tailwind CSS globals
-│   ├── types/                 # Canvas & Widget TypeScript interfaces
-│   ├── App.tsx                # App root & native window listener
-│   └── main.tsx               # Entry script
+│   │   ├── information/        # Clock widget
+│   │   ├── productivity/       # Timer, Pomodoro, Todo widgets
+│   │   ├── analytics/          # Productivity analytics widget
+│   │   ├── system/             # System monitor widget
+│   │   ├── custom/             # Custom note/block widget
+│   │   └── registry.ts         # Central widget type registry
+│   ├── templates/templates.ts  # Workspace template definitions
+│   ├── themes/themes.ts        # Theme definitions (Obsidian, Jade, etc.)
+│   ├── stores/                 # Zustand stores with local persistence
+│   ├── types/                  # TypeScript interfaces
+│   ├── App.tsx                 # App root
+│   └── main.tsx                # Entry script
 └── package.json
 ```
+
+---
+
+## 🔧 Session Controller IPC Commands
+
+These Tauri IPC commands are available from the frontend:
+
+| Command | Description |
+|---|---|
+| `start_planner_session` | Activate planner (Show Desktop + overlay canvas) |
+| `dismiss_planner_session` | Dismiss planner (hide canvas + restore windows) |
+| `toggle_planner_session` | Toggle current session state |
+| `get_session_state` | Returns current `SessionState` enum value |
+| `set_session_pinned(pinned: bool)` | Pin/unpin the session (pauses auto-dismiss) |
+| `is_session_pinned` | Returns current pin state |
+| `set_session_duration(seconds: u64)` | Set auto-dismiss countdown duration |
+| `get_session_duration` | Returns configured session duration |
 
 ---
 

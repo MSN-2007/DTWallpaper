@@ -4,6 +4,7 @@ import { WidgetContainer } from "./WidgetContainer";
 import { DesktopIconsLayer } from "./DesktopIconsLayer";
 import { NavigationRail } from "@/components/navigation/NavigationRail";
 import { ResourceSidebar } from "@/components/sidebar/ResourceSidebar";
+import { SessionHUD } from "@/components/session/SessionHUD";
 import { THEMES } from "@/themes/themes";
 import type { WallpaperData, DesktopIconItem } from "@/types";
 import {
@@ -144,7 +145,7 @@ export function Canvas() {
     });
   };
 
-  // Keyboard shortcut: 'E' toggles edit mode
+  // Keyboard shortcut: 'E' toggles edit mode, Escape dismisses the planner
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (
@@ -158,6 +159,16 @@ export function Canvas() {
         if (!e.ctrlKey && !e.altKey && !e.metaKey) {
           setMode(mode === "view" ? "edit" : "view");
         }
+      }
+
+      // Esc: dismiss planner session and restore desktop
+      if (e.key === "Escape") {
+        import("@tauri-apps/api/core")
+          .then(({ invoke }) => invoke("dismiss_planner_session"))
+          .catch(() => {
+            // Browser fallback: just hide
+            useCanvasStore.getState().hide?.();
+          });
       }
     },
     [mode, setMode]
@@ -308,6 +319,9 @@ export function Canvas() {
                 </>
               )}
             </button>
+
+            {/* Session HUD – timer countdown, pin, dismiss */}
+            <SessionHUD />
 
             {/* Minimize / Dismiss Window */}
             <button
